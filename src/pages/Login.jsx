@@ -10,6 +10,7 @@ const Login = () => {
   const [alerta, setAlerta] = useState({});
 
   const { setAuth, cargando } = useAuth();
+  const navigate = useNavigate();
 
   //console.log(auth);
   //console.log(cargando);
@@ -31,6 +32,7 @@ const Login = () => {
       setAlerta({});
       localStorage.setItem("token", data.token);
       setAuth(data);
+      navigate("/proyectos");
       //console.log(data);
     } catch (error) {
       //console.log(error.response.data.msg);
