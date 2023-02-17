@@ -9,7 +9,7 @@ const ProyectosProvider = ({ children }) => {
   const [proyecto, setProyecto] = useState({});
   const [cargando, setCargando] = useState(false);
   const [modalFormularioTarea, setModalFormularioTarea] = useState(false);
-
+  const [tarea, setTarea] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -89,6 +89,7 @@ const ProyectosProvider = ({ children }) => {
     }
     //Redireccionar
   };
+
   const nuevoProyecto = async (proyecto) => {
     try {
       const token = localStorage.getItem("token");
@@ -138,6 +139,7 @@ const ProyectosProvider = ({ children }) => {
       setCargando(false);
     }
   };
+
   const eliminarProyecto = async (id) => {
     try {
       const token = localStorage.getItem("token");
@@ -172,9 +174,19 @@ const ProyectosProvider = ({ children }) => {
 
   const handleModalTarea = () => {
     setModalFormularioTarea(!modalFormularioTarea);
+    setTarea({});
   };
+
   const submitTarea = async (tarea) => {
+    if (tarea?.id) {
+      await editarTarea(tarea);
+    } else {
+      await crearTarea(tarea);
+    }
+
     //console.log(tarea)
+  };
+  const crearTarea = async (tarea) => {
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
@@ -200,6 +212,42 @@ const ProyectosProvider = ({ children }) => {
       console.log(error);
     }
   };
+  const editarTarea = async (tarea) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      const { data } = await clienteAxios.put(
+        `/tareas/${tarea.id}`,
+        tarea,
+        config
+      );
+      //console.log(data);
+      const proyectoActualizado = { ...proyecto };
+      proyectoActualizado.tareas = proyectoActualizado.tareas.map(
+        (tareaState) => (tareaState._id === data._id ? data : tareaState)
+      );
+      setProyecto(proyectoActualizado);
+
+      setAlerta({});
+      setModalFormularioTarea(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleModalEditarTarea = (tarea) => {
+    //console.log(tarea);
+    setTarea(tarea);
+    setModalFormularioTarea(true);
+  };
 
   return (
     <ProyectosContext.Provider
@@ -215,6 +263,8 @@ const ProyectosProvider = ({ children }) => {
         modalFormularioTarea,
         handleModalTarea,
         submitTarea,
+        handleModalEditarTarea,
+        tarea,
       }}
     >
       {children}
