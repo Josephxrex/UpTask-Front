@@ -11,6 +11,7 @@ const ProyectosProvider = ({ children }) => {
   const [modalFormularioTarea, setModalFormularioTarea] = useState(false);
   const [tarea, setTarea] = useState({});
   const [modalEliminarTarea, setModalEliminarTarea] = useState(false);
+  const [colaborador, setColaborador] = useState({});
 
   const navigate = useNavigate();
 
@@ -136,7 +137,10 @@ const ProyectosProvider = ({ children }) => {
       //console.log(data)
       setProyecto(data);
     } catch (error) {
-      console.log(error);
+      setAlerta({
+        msg: error.reponse.data.msg,
+        error: true,
+      });
     } finally {
       setCargando(false);
     }
@@ -188,6 +192,7 @@ const ProyectosProvider = ({ children }) => {
 
     //console.log(tarea)
   };
+
   const crearTarea = async (tarea) => {
     try {
       const token = localStorage.getItem("token");
@@ -214,6 +219,7 @@ const ProyectosProvider = ({ children }) => {
       console.log(error);
     }
   };
+
   const editarTarea = async (tarea) => {
     try {
       const token = localStorage.getItem("token");
@@ -293,6 +299,73 @@ const ProyectosProvider = ({ children }) => {
     }
   };
 
+  const submitColaborador = async (email) => {
+    //console.log(email);
+    setCargando(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      const { data } = await clienteAxios.post(
+        "/proyectos/colaboradores/",
+        { email },
+        config
+      );
+      //console.log(data);
+      setColaborador(data);
+      setAlerta({});
+    } catch (error) {
+      //console.log(error.response);
+      setAlerta({
+        msg: error.response.data.msg,
+        error: true,
+      });
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  const agregarColaborador = async (email) => {
+    //console.log(email);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      const { data } = await clienteAxios.post(
+        `/proyectos/colaboradores/${proyecto._id}`,
+        email,
+        config
+      );
+      //console.log(data);
+      setAlerta({
+        msg: data.msg,
+        error: false,
+      });
+      setColaborador({});
+      setAlerta({});
+    } catch (error) {
+      //console.log(error.response);
+      setAlerta({
+        msg: error.response.data.msg,
+        error: true,
+      });
+    }
+  };
+
   return (
     <ProyectosContext.Provider
       value={{
@@ -312,6 +385,9 @@ const ProyectosProvider = ({ children }) => {
         modalEliminarTarea,
         handleModalEliminarTarea,
         eliminarTarea,
+        submitColaborador,
+        colaborador,
+        agregarColaborador,
       }}
     >
       {children}
