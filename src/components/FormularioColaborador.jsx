@@ -13,8 +13,8 @@ const FormularioColaborador = () => {
         error: true,
       });
     }
-
     submitColaborador(email);
+    setEmail("");
   };
 
   const { msg } = alerta;
